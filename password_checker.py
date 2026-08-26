@@ -75,3 +75,30 @@ if has_repeated:
     print("Repeated Characters : Suspicious")
 else:
     print("Repeated Characters : Not Suspicious")
+
+# Checking for sequential characters
+has_sequence = False
+sequence_count = 1
+
+for i in range(1, len(user_pass)):
+    current_char = user_pass[i]
+    previous_char = user_pass[i - 1]
+
+    diff = ord(current_char) - ord(previous_char)
+    if diff == 1:
+        sequence_count += 1
+        if sequence_count == 3:
+            has_sequence = True
+            break
+    elif diff == -1:
+        sequence_count += 1
+        if sequence_count == 3:
+            has_sequence = True
+            break
+    else:
+        sequence_count = 1
+
+if has_sequence:
+    print("Sequential Characters : Suspicious")
+else:
+    print("Sequential Characters : Not Suspicious")
