@@ -1,4 +1,10 @@
 import re
+import hashlib
+import requests
+
+
+
+
 # Taking password input from the user
 user_pass = input("Enter the Password : ")
 
@@ -148,11 +154,61 @@ if has_keypattern:
 else:
     print("Keyboard Pattern : No")
 
+
+# ==========================================
+# CREATING SHA-1 HASH LOCALLY
+# ==========================================
+
+password_hash = hashlib.sha1(
+    user_pass.encode("utf-8")
+).hexdigest().upper()
+
+# Separate the hash into prefix and suffix
+hash_prefix = password_hash[:5]
+hash_suffix = password_hash[5:]
+
+
+# ==========================================
+# HIBP PASSWORD BREACH CHECK
+# ==========================================
+
+is_compromised = False
+breach_count = 0
+hibp_available = False
+
+try:
+    url = f"https://api.pwnedpasswords.com/range/{hash_prefix}"
+
+    response = requests.get(url, timeout=10)
+
+    # Check whether the HTTP request was successful
+    response.raise_for_status()
+
+    hibp_available = True
+
+    # Search through the returned hash suffixes
+    for line in response.text.splitlines():
+
+        returned_suffix, count = line.split(":")
+
+        if returned_suffix == hash_suffix:
+            is_compromised = True
+            breach_count = int(count)
+            break
+
+except requests.exceptions.Timeout:
+    print("HIBP Error: Request timed out.")
+
+except requests.exceptions.RequestException:
+    print("HIBP Error: Unable to connect to the service.")
+
+
 # ==========================================
 # PASSWORD SECURITY SCORING
 # ==========================================
 
 score = 100
+
 
 # ---------- PENALTIES ----------
 
@@ -190,20 +246,31 @@ if len(user_pass) >= 16:
 
 # ---------- PREDICTABILITY BONUS ----------
 
-# Give a small bonus only when none of our
-# currently detected predictable patterns exist.
 if not has_sequence and not has_repeated and not has_keypattern:
     score += 10
 
 
-# ---------- SCORE LIMIT ----------
+# ---------- HIBP COMPROMISE PENALTY ----------
 
-# Keep score between 0 and 100
-score = max(0, min(score, 100))
+if is_compromised:
 
-# ==========================================
-# SEVERITY CAPS
-# ==========================================
+    if breach_count >= 1_000_000:
+        score -= 50
+
+    elif breach_count >= 10_000:
+        score -= 40
+
+    elif breach_count >= 100:
+        score -= 30
+
+    elif breach_count >= 10:
+        score -= 20
+
+    else:
+        score -= 10
+
+
+# ---------- SEVERITY CAPS ----------
 
 # Extremely predictable passwords should never
 # receive a high security rating.
@@ -219,21 +286,53 @@ if has_keypattern:
 
 if has_weakpass:
     score = min(score, 49)
-    
-# ---------- FINAL RATING ----------
+
+# A compromised password should never be considered Strong.
+if is_compromised:
+    score = min(score, 49)
+
+
+# ---------- SCORE LIMIT ----------
+
+score = max(0, min(score, 100))
+
+
+# ==========================================
+# FINAL SECURITY RATING
+# ==========================================
 
 if score >= 80:
     rating = "Strong"
+
 elif score >= 60:
     rating = "Moderate"
+
 elif score >= 40:
     rating = "Weak"
+
 else:
     rating = "Very Weak"
 
 
+# ==========================================
+# DISPLAY RESULT
+# ==========================================
+
 print("\n==============================")
 print("PASSWORD SECURITY ASSESSMENT")
 print("==============================")
+
 print("Security Score :", score, "/ 100")
 print("Security Rating:", rating)
+
+# HIBP result
+if not hibp_available:
+    print("Compromised Password : UNKNOWN")
+    print("HIBP Status : Service unavailable")
+
+elif is_compromised:
+    print("Compromised Password : YES")
+    print("Times Seen in Breaches :", breach_count)
+
+else:
+    print("Compromised Password : NO")
