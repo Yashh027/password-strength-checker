@@ -3,336 +3,407 @@ import hashlib
 import requests
 
 
+def check_password(user_pass):
 
+    # ==========================================
+    # BASIC PASSWORD CHARACTER CHECKS
+    # ==========================================
 
-# Taking password input from the user
-user_pass = input("Enter the Password : ")
+    password_length = len(user_pass)
 
-# Checking and displaying the length of the password 
-print("Password length:" + str(len(user_pass)))
+    # Checking for uppercase characters
+    has_upper = False
 
-# Checking for uppercase characters in password and displaying the Result
-has_upper = False
-for char in user_pass:
-    if char.isupper():
-        has_upper = True
-        break
-if has_upper:
-    print("Contains Uppercase : Yes")
-else:
-    print("Contains Uppercase : No")
-    
-# Checking for lowercase characters in password and displaying the Result
-has_lower = False
-for char in user_pass:
-    if char.islower():
-        has_lower = True
-        break
-if has_lower:
-    print("Contains Lowercase : Yes")
-else:
-    print("Contains Lowercase : No")
-    
-# Checking for digits in password and displaying the Result
-has_digit = False
-for char in user_pass:
-    if char.isdigit():
-        has_digit = True
-        break
-if has_digit:
-    print("Contains Number : Yes")
-else:
-    print("Contains Number : No")
-    
-# Checking for special characters in password and displaying the Result
-has_special = False
-for char in user_pass:
-    if char.isupper():
-        has_special = False
-    elif char.islower():
-        has_special = False
-    elif char.isdigit():
-        has_special = False
-    elif char == " ":
-        has_special = False
-    else:
-        has_special = True
-        break
-    # if char == "!" or char == "@" or char == "#" or char == "$" or char == "%" or char == "^" or char == "&" or char == "*" or char == "(" or char == ")" or char == "-" or char == "_" or char == "=" or char == "+" or char == '"':
-if has_special:
-    print("Contains Special Character : Yes")
-else:    
-    print("Contains Special Character : No")
-
-# Checking for repeated characters
-has_repeated = False
-count = 1  # Start at 1 because a single character is a streak of 1
-
-# Start from the 2nd character (index 1)
-for i in range(1, len(user_pass)):
-    if user_pass[i] == user_pass[i - 1]:
-        count += 1
-        if count == 3:
-            has_repeated = True
-            break  # Exit immediately since we found a triple repeat
-    else:
-        count = 1  # Reset streak back to 1 if the characters don't match
-
-if has_repeated:
-    print("Repeated Characters : Suspicious")
-else:
-    print("Repeated Characters : Not Suspicious")
-
-# Checking for sequential characters
-has_sequence = False
-sequence_count = 1
-
-for i in range(1, len(user_pass)):
-    current_char = user_pass[i]
-    previous_char = user_pass[i - 1]
-
-    diff = ord(current_char) - ord(previous_char)
-    if diff == 1 or diff == -1:
-        sequence_count += 1
-        if sequence_count == 3:
-            has_sequence = True
-            break
-    else:
-        sequence_count = 1
-
-if has_sequence:
-    print("Sequential Characters : Suspicious")
-else:
-    print("Sequential Characters : Not Suspicious")
-
-# Checking for weak passwords
-weak_passwords = [
-    "password",
-    "123456",
-    "qwerty",
-    "admin",
-    "welcome",
-    "abc123"
-]
-
-normalized_pass = user_pass.lower()
-normalized_pass = re.sub(r"[\d\W_]+$", "", normalized_pass)
-
-has_weakpass = False
-for i in weak_passwords:
-    if normalized_pass == i:
-        has_weakpass = True
-        break
-    else:
-        continue
-if has_weakpass:
-    print("Weak Password : Yes")
-else:
-    print("Weak Password : No")
-
-# Checking for Keyboard Pattern Detection 
-keyboard_pattern = [
-    "qwerty",
-    "asdfgh",
-    "zxcvbn",
-    "123456",
-    "1qaz2wsx",
-    "qwertyuiop",
-    "asdfghjkl",
-    "zxcvbnm",
-    "1234567890"
-]
-
-has_keypattern = False
-for i in keyboard_pattern:
-    if i in user_pass.lower():
-        has_keypattern = True
-        break
-
-if has_keypattern:
-    print("Keyboard Pattern : Yes")
-else:
-    print("Keyboard Pattern : No")
-
-
-# ==========================================
-# CREATING SHA-1 HASH LOCALLY
-# ==========================================
-
-password_hash = hashlib.sha1(
-    user_pass.encode("utf-8")
-).hexdigest().upper()
-
-# Separate the hash into prefix and suffix
-hash_prefix = password_hash[:5]
-hash_suffix = password_hash[5:]
-
-
-# ==========================================
-# HIBP PASSWORD BREACH CHECK
-# ==========================================
-
-is_compromised = False
-breach_count = 0
-hibp_available = False
-
-try:
-    url = f"https://api.pwnedpasswords.com/range/{hash_prefix}"
-
-    response = requests.get(url, timeout=10)
-
-    # Check whether the HTTP request was successful
-    response.raise_for_status()
-
-    hibp_available = True
-
-    # Search through the returned hash suffixes
-    for line in response.text.splitlines():
-
-        returned_suffix, count = line.split(":")
-
-        if returned_suffix == hash_suffix:
-            is_compromised = True
-            breach_count = int(count)
+    for char in user_pass:
+        if char.isupper():
+            has_upper = True
             break
 
-except requests.exceptions.Timeout:
-    print("HIBP Error: Request timed out.")
+    # Checking for lowercase characters
+    has_lower = False
 
-except requests.exceptions.RequestException:
-    print("HIBP Error: Unable to connect to the service.")
+    for char in user_pass:
+        if char.islower():
+            has_lower = True
+            break
 
+    # Checking for digits
+    has_digit = False
 
-# ==========================================
-# PASSWORD SECURITY SCORING
-# ==========================================
+    for char in user_pass:
+        if char.isdigit():
+            has_digit = True
+            break
 
-score = 100
+    # Checking for special characters
+    has_special = False
 
+    for char in user_pass:
+        if char.isupper():
+            has_special = False
 
-# ---------- PENALTIES ----------
+        elif char.islower():
+            has_special = False
 
-# Very short password
-if len(user_pass) < 8:
-    score -= 20
+        elif char.isdigit():
+            has_special = False
 
-# Common / weak password
-if has_weakpass:
-    score -= 40
+        elif char == " ":
+            has_special = False
 
-# Sequential characters
-if has_sequence:
-    score -= 30
-
-# Repeated characters
-if has_repeated:
-    score -= 20
-
-# Keyboard pattern
-if has_keypattern:
-    score -= 30
-
-
-# ---------- LENGTH BONUSES ----------
-
-# Good password length
-if len(user_pass) >= 12:
-    score += 15
-
-# Strong password length
-if len(user_pass) >= 16:
-    score += 20
+        else:
+            has_special = True
+            break
 
 
-# ---------- PREDICTABILITY BONUS ----------
+    # ==========================================
+    # REPEATED CHARACTER DETECTION
+    # ==========================================
 
-if not has_sequence and not has_repeated and not has_keypattern:
-    score += 10
+    has_repeated = False
+    count = 1
+
+    for i in range(1, len(user_pass)):
+
+        if user_pass[i] == user_pass[i - 1]:
+
+            count += 1
+
+            if count == 3:
+                has_repeated = True
+                break
+
+        else:
+            count = 1
 
 
-# ---------- HIBP COMPROMISE PENALTY ----------
+    # ==========================================
+    # SEQUENTIAL CHARACTER DETECTION
+    # ==========================================
 
-if is_compromised:
+    has_sequence = False
+    sequence_count = 1
 
-    if breach_count >= 1_000_000:
-        score -= 50
+    for i in range(1, len(user_pass)):
 
-    elif breach_count >= 10_000:
-        score -= 40
+        current_char = user_pass[i]
+        previous_char = user_pass[i - 1]
 
-    elif breach_count >= 100:
-        score -= 30
+        diff = ord(current_char) - ord(previous_char)
 
-    elif breach_count >= 10:
+        if diff == 1 or diff == -1:
+
+            sequence_count += 1
+
+            if sequence_count == 3:
+                has_sequence = True
+                break
+
+        else:
+            sequence_count = 1
+
+
+    # ==========================================
+    # WEAK PASSWORD DETECTION
+    # ==========================================
+
+    weak_passwords = [
+        "password",
+        "123456",
+        "qwerty",
+        "admin",
+        "welcome",
+        "abc123"
+    ]
+
+    normalized_pass = user_pass.lower()
+    normalized_pass = re.sub(r"[\d\W_]+$", "", normalized_pass)
+
+    has_weakpass = False
+
+    for weak_password in weak_passwords:
+
+        if normalized_pass == weak_password:
+            has_weakpass = True
+            break
+
+
+    # ==========================================
+    # KEYBOARD PATTERN DETECTION
+    # ==========================================
+
+    keyboard_pattern = [
+        "qwerty",
+        "asdfgh",
+        "zxcvbn",
+        "123456",
+        "1qaz2wsx",
+        "qwertyuiop",
+        "asdfghjkl",
+        "zxcvbnm",
+        "1234567890"
+    ]
+
+    has_keypattern = False
+
+    for pattern in keyboard_pattern:
+
+        if pattern in user_pass.lower():
+            has_keypattern = True
+            break
+
+
+    # ==========================================
+    # CREATING SHA-1 HASH LOCALLY
+    # ==========================================
+
+    password_hash = hashlib.sha1(
+        user_pass.encode("utf-8")
+    ).hexdigest().upper()
+
+    hash_prefix = password_hash[:5]
+    hash_suffix = password_hash[5:]
+
+
+    # ==========================================
+    # HIBP PASSWORD BREACH CHECK
+    # ==========================================
+
+    is_compromised = False
+    breach_count = 0
+    hibp_available = False
+
+    try:
+
+        url = f"https://api.pwnedpasswords.com/range/{hash_prefix}"
+
+        response = requests.get(
+            url,
+            timeout=10
+        )
+
+        response.raise_for_status()
+
+        hibp_available = True
+
+        for line in response.text.splitlines():
+
+            returned_suffix, count = line.split(":")
+
+            if returned_suffix == hash_suffix:
+
+                is_compromised = True
+                breach_count = int(count)
+
+                break
+
+    except requests.exceptions.Timeout:
+
+        pass
+
+    except requests.exceptions.RequestException:
+
+        pass
+
+
+    # ==========================================
+    # PASSWORD SECURITY SCORING
+    # ==========================================
+
+    score = 100
+
+
+    # ---------- PENALTIES ----------
+
+    if password_length < 8:
         score -= 20
 
+    if has_weakpass:
+        score -= 40
+
+    if has_sequence:
+        score -= 30
+
+    if has_repeated:
+        score -= 20
+
+    if has_keypattern:
+        score -= 30
+
+
+    # ---------- LENGTH BONUSES ----------
+
+    if password_length >= 12:
+        score += 15
+
+    if password_length >= 16:
+        score += 20
+
+
+    # ---------- PREDICTABILITY BONUS ----------
+
+    if not has_sequence and not has_repeated and not has_keypattern:
+        score += 10
+
+
+    # ---------- HIBP COMPROMISE PENALTY ----------
+
+    if is_compromised:
+
+        if breach_count >= 1_000_000:
+            score -= 50
+
+        elif breach_count >= 10_000:
+            score -= 40
+
+        elif breach_count >= 100:
+            score -= 30
+
+        elif breach_count >= 10:
+            score -= 20
+
+        else:
+            score -= 10
+
+
+    # ---------- SEVERITY CAPS ----------
+
+    if has_sequence and password_length < 12:
+        score = min(score, 39)
+
+    if has_repeated and password_length < 12:
+        score = min(score, 39)
+
+    if has_keypattern:
+        score = min(score, 39)
+
+    if has_weakpass:
+        score = min(score, 49)
+
+    if is_compromised:
+        score = min(score, 49)
+
+
+    # ---------- SCORE LIMIT ----------
+
+    score = max(0, min(score, 100))
+
+
+    # ==========================================
+    # FINAL SECURITY RATING
+    # ==========================================
+
+    if score >= 80:
+        rating = "Strong"
+
+    elif score >= 60:
+        rating = "Moderate"
+
+    elif score >= 40:
+        rating = "Weak"
+
     else:
-        score -= 10
+        rating = "Very Weak"
 
 
-# ---------- SEVERITY CAPS ----------
+    # ==========================================
+    # RETURN RESULTS TO GUI
+    # ==========================================
 
-# Extremely predictable passwords should never
-# receive a high security rating.
-
-if has_sequence and len(user_pass) < 12:
-    score = min(score, 39)
-
-if has_repeated and len(user_pass) < 12:
-    score = min(score, 39)
-
-if has_keypattern:
-    score = min(score, 39)
-
-if has_weakpass:
-    score = min(score, 49)
-
-# A compromised password should never be considered Strong.
-if is_compromised:
-    score = min(score, 49)
-
-
-# ---------- SCORE LIMIT ----------
-
-score = max(0, min(score, 100))
+    return {
+        "length": password_length,
+        "has_upper": has_upper,
+        "has_lower": has_lower,
+        "has_digit": has_digit,
+        "has_special": has_special,
+        "has_repeated": has_repeated,
+        "has_sequence": has_sequence,
+        "has_weakpass": has_weakpass,
+        "has_keypattern": has_keypattern,
+        "score": score,
+        "rating": rating,
+        "is_compromised": is_compromised,
+        "breach_count": breach_count,
+        "hibp_available": hibp_available
+    }
 
 
 # ==========================================
-# FINAL SECURITY RATING
+# TERMINAL TEST
 # ==========================================
 
-if score >= 80:
-    rating = "Strong"
+if __name__ == "__main__":
 
-elif score >= 60:
-    rating = "Moderate"
+    user_pass = input("Enter the Password : ")
 
-elif score >= 40:
-    rating = "Weak"
+    result = check_password(user_pass)
 
-else:
-    rating = "Very Weak"
+    print("\n==============================")
+    print("PASSWORD SECURITY ASSESSMENT")
+    print("==============================")
 
+    print("Password length :", result["length"])
 
-# ==========================================
-# DISPLAY RESULT
-# ==========================================
+    print(
+        "Contains Uppercase :",
+        "Yes" if result["has_upper"] else "No"
+    )
 
-print("\n==============================")
-print("PASSWORD SECURITY ASSESSMENT")
-print("==============================")
+    print(
+        "Contains Lowercase :",
+        "Yes" if result["has_lower"] else "No"
+    )
 
-print("Security Score :", score, "/ 100")
-print("Security Rating:", rating)
+    print(
+        "Contains Number :",
+        "Yes" if result["has_digit"] else "No"
+    )
 
-# HIBP result
-if not hibp_available:
-    print("Compromised Password : UNKNOWN")
-    print("HIBP Status : Service unavailable")
+    print(
+        "Contains Special Character :",
+        "Yes" if result["has_special"] else "No"
+    )
 
-elif is_compromised:
-    print("Compromised Password : YES")
-    print("Times Seen in Breaches :", breach_count)
+    print(
+        "Repeated Characters :",
+        "Suspicious" if result["has_repeated"] else "Not Suspicious"
+    )
 
-else:
-    print("Compromised Password : NO")
+    print(
+        "Sequential Characters :",
+        "Suspicious" if result["has_sequence"] else "Not Suspicious"
+    )
+
+    print(
+        "Weak Password :",
+        "Yes" if result["has_weakpass"] else "No"
+    )
+
+    print(
+        "Keyboard Pattern :",
+        "Yes" if result["has_keypattern"] else "No"
+    )
+
+    print("\n==============================")
+    print("PASSWORD SECURITY ASSESSMENT")
+    print("==============================")
+
+    print("Security Score :", result["score"], "/ 100")
+    print("Security Rating:", result["rating"])
+
+    if not result["hibp_available"]:
+
+        print("Compromised Password : UNKNOWN")
+        print("HIBP Status : Service unavailable")
+
+    elif result["is_compromised"]:
+
+        print("Compromised Password : YES")
+        print(
+            "Times Seen in Breaches :",
+            result["breach_count"]
+        )
+
+    else:
+
+        print("Compromised Password : NO")
