@@ -147,3 +147,93 @@ if has_keypattern:
     print("Keyboard Pattern : Yes")
 else:
     print("Keyboard Pattern : No")
+
+# ==========================================
+# PASSWORD SECURITY SCORING
+# ==========================================
+
+score = 100
+
+# ---------- PENALTIES ----------
+
+# Very short password
+if len(user_pass) < 8:
+    score -= 20
+
+# Common / weak password
+if has_weakpass:
+    score -= 40
+
+# Sequential characters
+if has_sequence:
+    score -= 30
+
+# Repeated characters
+if has_repeated:
+    score -= 20
+
+# Keyboard pattern
+if has_keypattern:
+    score -= 30
+
+
+# ---------- LENGTH BONUSES ----------
+
+# Good password length
+if len(user_pass) >= 12:
+    score += 15
+
+# Strong password length
+if len(user_pass) >= 16:
+    score += 20
+
+
+# ---------- PREDICTABILITY BONUS ----------
+
+# Give a small bonus only when none of our
+# currently detected predictable patterns exist.
+if not has_sequence and not has_repeated and not has_keypattern:
+    score += 10
+
+
+# ---------- SCORE LIMIT ----------
+
+# Keep score between 0 and 100
+score = max(0, min(score, 100))
+
+# ==========================================
+# SEVERITY CAPS
+# ==========================================
+
+# Extremely predictable passwords should never
+# receive a high security rating.
+
+if has_sequence and len(user_pass) < 12:
+    score = min(score, 39)
+
+if has_repeated and len(user_pass) < 12:
+    score = min(score, 39)
+
+if has_keypattern:
+    score = min(score, 39)
+
+if has_weakpass:
+    score = min(score, 49)
+    
+# ---------- FINAL RATING ----------
+
+if score >= 80:
+    rating = "Strong"
+elif score >= 60:
+    rating = "Moderate"
+elif score >= 40:
+    rating = "Weak"
+else:
+    rating = "Very Weak"
+
+
+print("\n==============================")
+print("PASSWORD SECURITY ASSESSMENT")
+print("==============================")
+print("Security Score :", score, "/ 100")
+print("Security Rating:", rating)
