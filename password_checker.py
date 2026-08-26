@@ -123,3 +123,27 @@ if has_weakpass:
     print("Weak Password : Yes")
 else:
     print("Weak Password : No")
+
+# Checking for Keyboard Pattern Detection 
+keyboard_pattern = [
+    "qwerty",
+    "asdfgh",
+    "zxcvbn",
+    "123456",
+    "1qaz2wsx",
+    "qwertyuiop",
+    "asdfghjkl",
+    "zxcvbnm",
+    "1234567890"
+]
+
+has_keypattern = False
+for i in keyboard_pattern:
+    if i in user_pass.lower():
+        has_keypattern = True
+        break
+
+if has_keypattern:
+    print("Keyboard Pattern : Yes")
+else:
+    print("Keyboard Pattern : No")
