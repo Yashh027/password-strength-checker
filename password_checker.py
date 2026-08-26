@@ -1,3 +1,4 @@
+import re
 # Taking password input from the user
 user_pass = input("Enter the Password : ")
 
@@ -85,12 +86,7 @@ for i in range(1, len(user_pass)):
     previous_char = user_pass[i - 1]
 
     diff = ord(current_char) - ord(previous_char)
-    if diff == 1:
-        sequence_count += 1
-        if sequence_count == 3:
-            has_sequence = True
-            break
-    elif diff == -1:
+    if diff == 1 or diff == -1:
         sequence_count += 1
         if sequence_count == 3:
             has_sequence = True
@@ -102,3 +98,28 @@ if has_sequence:
     print("Sequential Characters : Suspicious")
 else:
     print("Sequential Characters : Not Suspicious")
+
+# Checking for weak passwords
+weak_passwords = [
+    "password",
+    "123456",
+    "qwerty",
+    "admin",
+    "welcome",
+    "abc123"
+]
+
+normalized_pass = user_pass.lower()
+normalized_pass = re.sub(r"[\d\W_]+$", "", normalized_pass)
+
+has_weakpass = False
+for i in weak_passwords:
+    if normalized_pass == i:
+        has_weakpass = True
+        break
+    else:
+        continue
+if has_weakpass:
+    print("Weak Password : Yes")
+else:
+    print("Weak Password : No")
