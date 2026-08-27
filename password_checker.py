@@ -1,7 +1,7 @@
 import hashlib
 import requests
 from pathlib import Path
-
+import sys
 
 # ============================================================
 # LOAD COMMON PASSWORD DATABASE
@@ -9,7 +9,10 @@ from pathlib import Path
 
 def load_common_passwords():
 
-    password_file = Path(__file__).parent / "common_passwords.txt"
+    if getattr(sys, "frozen", False):
+        password_file = Path(sys._MEIPASS) / "common_passwords.txt"
+    else:
+        password_file = Path(__file__).parent / "common_passwords.txt"
 
     try:
 
