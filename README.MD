@@ -1,233 +1,526 @@
-# Password Security Analyzer
+# 🔐 Password Security Analyzer
 
-A Python-based cybersecurity project that analyzes password security using multiple security checks and verifies whether a password has appeared in known data breaches.
+A Python-based desktop cybersecurity tool that analyzes password security using multiple local security checks and breach-exposure intelligence.
 
-## Developed By
-
-**Yash Pathak**
-
-Cybersecurity Project
+The application provides a graphical interface built with Tkinter and evaluates passwords for common weaknesses such as predictable patterns, repeated characters, sequential characters, keyboard patterns, and common-password usage. It also checks whether a password has appeared in known data breaches using the Have I Been Pwned (HIBP) Pwned Passwords API.
 
 ---
 
-## Project Overview
+## 📌 Overview
 
-Password Security Analyzer is a desktop-based cybersecurity tool developed using Python and Tkinter.
+Weak and reused passwords are one of the most common causes of account compromise.
 
-The application evaluates a password using several security indicators and generates an overall security score from 0 to 100.
+The **Password Security Analyzer** was developed as a cybersecurity-focused desktop application to demonstrate how password security can be evaluated through a combination of:
 
-It also checks whether the password has been exposed in known data breaches using the Have I Been Pwned (HIBP) Pwned Passwords API.
+- Local password pattern analysis
+- Password complexity checks
+- Common-password detection
+- Predictable modification detection
+- Keyboard-pattern detection
+- Sequential-character detection
+- Repeated-character detection
+- Password length analysis
+- Known breach exposure checking
 
-The application is designed for educational and cybersecurity awareness purposes.
+The application presents the results through a dark-themed graphical user interface designed to make security findings easy to understand.
 
 ---
 
-## Features
+## ✨ Features
 
-### Password Analysis
+### 🔍 Password Complexity Analysis
 
-The application checks:
+The application checks whether the password contains:
 
-- Password length
 - Uppercase characters
 - Lowercase characters
 - Numbers
 - Special characters
-- Repeated characters
-- Sequential characters
-- Common or weak passwords
-- Keyboard patterns
-
-### Security Scoring
-
-The password receives a security score between:
-
-**0 – 100**
-
-The application assigns one of four security ratings:
-
-| Score | Rating |
-|------:|--------|
-| 80–100 | Strong |
-| 60–79 | Moderate |
-| 40–59 | Weak |
-| 0–39 | Very Weak |
-
-The scoring system considers password complexity, predictability, password length, and breach exposure.
-
-### Breach Detection
-
-The application uses the Have I Been Pwned Pwned Passwords API to determine whether a password has appeared in known breaches.
-
-The application uses the API's k-anonymity approach:
-
-1. The password is hashed locally using SHA-1.
-2. Only the first five characters of the hash are sent to the API.
-3. The remaining hash suffix is compared locally.
-4. The original password itself is never sent to the API.
-
-If a match is found, the application displays the number of times the password has appeared in known breach data.
+- A recommended minimum length of 12 characters
 
 ---
 
-## Technologies Used
+### 🔁 Repeated Character Detection
 
-- Python
-- Tkinter
-- Regular Expressions
-- SHA-1 Hashing
-- Requests Library
-- Have I Been Pwned Pwned Passwords API
+The analyzer detects repeated characters occurring consecutively.
 
----
-
-## Project Structure
+For example:
 
 ```text
-password-strength-checker/
-│
-├── gui.py
-│       Graphical user interface for the application.
+Passwordaaa123!
+
+may be flagged because of the repeated a characters.
+
+🔢 Sequential Character Detection
+
+The application checks for sequential character patterns.
+
+Examples include:
+
+abc
+123
+321
+xyz
+
+Sequential patterns can make passwords easier to predict.
+
+⌨️ Keyboard Pattern Detection
+
+The analyzer checks for commonly used keyboard sequences such as:
+
+qwerty
+asdfgh
+zxcvbn
+123456
+1qaz2wsx
+qwertyuiop
+asdfghjkl
+zxcvbnm
+1234567890
+
+These patterns are frequently used in weak passwords and are therefore treated as security risks.
+
+📚 Common Password Detection
+
+The application uses a local common_passwords.txt dataset to determine whether the entered password directly matches a known common password.
+
+The password list is loaded locally by the application.
+
+🔄 Predictable Password Modification Detection
+
+The analyzer also checks whether a password appears to be a predictable variation of a common password.
+
+For example:
+
+password
+password123
+password12
+123password
+
+A password does not become significantly safer simply because a few predictable numbers or characters are added to a common password.
+
+🌐 Breach Exposure Detection
+
+The application uses the Have I Been Pwned Pwned Passwords API to determine whether a password has appeared in known data breaches.
+
+The application does not send the complete password to the API.
+
+Instead, it:
+
+Generates a SHA-1 hash of the password locally.
+Sends only the first five characters of the hash to the API.
+Receives a list of matching hash suffixes.
+Performs the final comparison locally.
+Reports whether the password was found and how many times it has appeared.
+
+This approach follows the API's k-anonymity model and avoids sending the complete password to the breach-checking service.
+
+🖥️ Graphical User Interface
+
+The application includes a custom Tkinter interface featuring:
+
+Cybersecurity-themed dark UI
+Password input field
+Show/Hide password functionality
+Analyze button
+Clear button
+Security assessment section
+Password length display
+Individual security checks
+Breach intelligence section
+Analysis summary
+Project information section
+Scrollable interface
+🛠️ Technologies Used
+Technology	Purpose
+Python	Core programming language
+Tkinter	Graphical user interface
+Requests	Communication with the HIBP API
+hashlib	Local SHA-1 password hashing
+Regular expressions	Password-analysis support
+pathlib	Local password-list file handling
+Have I Been Pwned API	Password breach exposure checking
+📂 Project Structure
+password-security-analyzer/
 │
 ├── password_checker.py
-│       Password analysis, scoring and breach-checking logic.
-│
-├── README.md
-│       Project documentation.
-│
+├── password_security_analyzer.py
+├── common_passwords.txt
 ├── requirements.txt
-│       Required Python packages.
-│
+├── README.md
 ├── .gitignore
-│       Files excluded from version control.
 │
-└── LICENSE
-        License and usage information.
-Installation
-1. Clone the Repository
+└── screenshots/
+    ├── compromised-password.png
+    ├── strong-password.png
+    └── pattern-detection.png
+File Description
+password_checker.py
 
-Clone the project from GitHub:
+Contains the core password-security analysis engine.
 
+It performs:
+
+Password length analysis
+Character-type checks
+Repeated-character detection
+Sequential-pattern detection
+Common-password detection
+Keyboard-pattern detection
+Predictable modification detection
+HIBP breach checking
+Security verdict generation
+password_security_analyzer.py
+
+Contains the Tkinter graphical interface.
+
+It connects the GUI with the password-analysis engine and displays the analysis results to the user.
+
+common_passwords.txt
+
+Contains the local list of common passwords used by the application for password-strength analysis.
+
+requirements.txt
+
+Contains the external Python dependency required by the project.
+
+README.md
+
+Project documentation and usage information.
+
+⚙️ Requirements
+
+Before running the project, make sure you have:
+
+Python 3.x
+Internet connection for breach checking
+requests Python package
+
+Tkinter is included with most standard Python installations on Windows.
+
+🚀 Installation
+1. Clone the repository
 git clone https://github.com/Yashh027/password-strength-checker.git
-
-
-Move into the project directory:
-
-cd password-strength-checker
-2. Install Python
-
-Make sure Python 3.10 or newer is installed on your system.
-
-Check the installed Python version:
-
-python --version
-3. Install Required Dependencies
-
-Install the required dependencies using:
-
+2. Open the project directory
+cd password-security-analyzer
+3. Install the required dependency
 pip install -r requirements.txt
-
-The project uses the requests library for communicating with the Have I Been Pwned Pwned Passwords API.
-
-Tkinter is used for the graphical interface and is included with most standard Python installations.
-
-4. Run the Application
-
-Start the graphical application using:
-
-python gui.py
+4. Run the application
+python password_security_analyzer.py
 
 The Password Security Analyzer window should open.
 
-How to Use
-Launch the application using python gui.py.
+🧪 How to Use
+Step 1 — Enter a password
+
 Enter a password into the password input field.
-Click ANALYZE.
-The application evaluates the password using multiple security checks.
-Review the generated security score and threat rating.
-Review the individual security checks.
-Check the Breach Intelligence section to determine whether the password has appeared in known breach data.
-Use the SHOW/HIDE button to control password visibility.
-Use CLEAR to remove the current password and reset the analysis.
 
-Important: Do not enter passwords that you currently use for important personal accounts into testing tools unless you understand how the application handles the data.
+The password is initially hidden for privacy.
 
-Running the Project
+Step 2 — Run the analysis
 
-The main files required to run the application are:
+Click:
 
-gui.py
-password_checker.py
+ANALYZE
 
-Run the application with:
+The application will perform the configured local security checks and attempt a breach-exposure check.
 
-python gui.py
+Step 3 — Review the security assessment
 
-No web server or database is required.
+The application displays an overall assessment such as:
 
-Privacy and Security
+ACTION REQUIRED
+HIGH RISK PATTERN
+PREDICTABLE PASSWORD
+NEEDS IMPROVEMENT
+NO MAJOR ISSUES
+Step 4 — Review individual security checks
 
-The password itself is not sent directly to the Have I Been Pwned API.
+The Security Checks section displays the results for:
 
-The application uses the Pwned Passwords API's k-anonymity model. The password is hashed locally, and only a partial hash prefix is used for the API request.
+Uppercase characters
+Lowercase characters
+Numbers
+Special characters
+Repeated characters
+Sequential patterns
+Common passwords
+Keyboard patterns
+Predictable modifications
 
-The application is intended for educational and cybersecurity awareness purposes.
+A green check indicates that the corresponding check passed.
 
-Users should avoid entering real passwords that are actively used on sensitive accounts.
+A red cross indicates that the corresponding issue was detected.
 
-API Information
+Step 5 — Review breach intelligence
 
-This project uses the Have I Been Pwned Pwned Passwords API for breach exposure checking.
+The Breach Intelligence section reports whether the password was found in known breach data.
 
-API documentation:
+Possible states include:
 
-https://haveibeenpwned.com/API/v3#PwnedPasswords
+COMPROMISED
+NOT FOUND
+UNKNOWN
 
-The API is used to determine whether a password hash appears in known compromised password datasets.
+If the password is found, the application also displays the number of times it has appeared in the breach dataset returned by HIBP.
 
-Limitations
+🔐 Privacy and Security
 
-The Password Security Analyzer is an educational security tool and should not be considered a complete password security solution.
+Privacy was considered during the design of the breach-checking functionality.
 
-The security score is an application-defined assessment based on the implemented checks. A high score does not guarantee that a password is impossible to guess or has never been compromised.
+The application does not send the user's complete password to the HIBP Pwned Passwords API.
 
-Breach information depends on the data available through the Have I Been Pwned service.
+Instead, the password is hashed locally using SHA-1:
 
-The application does not attempt to crack passwords or perform brute-force attacks.
+Password
+   ↓
+SHA-1 Hash
+   ↓
+First 5 Hash Characters → HIBP API
+   ↓
+Matching Hash Suffixes
+   ↓
+Local Comparison
 
-Future Improvements
+The complete password remains on the user's local machine during the breach-checking process.
+
+Important Note
+
+Although SHA-1 is not considered suitable for modern cryptographic security applications, it is used here because the HIBP Pwned Passwords API uses SHA-1 password hashes as part of its API design.
+
+This project is intended for password-security analysis and educational/portfolio purposes.
+
+⚠️ Limitations
+
+This application should not be treated as a complete password-security solution.
+
+1. Rule-Based Analysis
+
+The local password analysis is based on predefined rules.
+
+It does not represent every possible password-cracking technique.
+
+2. Breach Database Dependency
+
+Breach results depend on the availability and data coverage of the HIBP Pwned Passwords service.
+
+If the service is unavailable, the application reports the breach status as:
+
+UNKNOWN
+
+rather than incorrectly assuming that the password is safe.
+
+3. No Absolute Security Guarantee
+
+A password that passes all checks cannot be guaranteed to be secure.
+
+Security depends on many factors, including:
+
+Password reuse
+Account security
+Multi-factor authentication
+Credential theft
+Phishing
+Malware
+Service-specific security controls
+Future password-cracking techniques
+4. Common Password Dataset
+
+The quality of local common-password detection depends on the contents of:
+
+common_passwords.txt
+
+Updating this dataset can improve local detection coverage.
+
+🧠 Security Logic
+
+The application evaluates several independent characteristics rather than relying on password length alone.
+
+The general analysis flow is:
+
+                ┌─────────────────────┐
+                │   Password Input    │
+                └──────────┬──────────┘
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │ Local Password Analysis │
+              └────────────┬────────────┘
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+          ▼                ▼                ▼
+    Complexity        Pattern Checks   Common Password
+      Checks              │                Check
+          │               │                │
+          └───────────────┼────────────────┘
+                          │
+                          ▼
+                ┌─────────────────────┐
+                │ SHA-1 Hash Locally  │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │ HIBP K-Anonymity    │
+                │    Password Check   │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │ Security Assessment │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                ┌─────────────────────┐
+                │     GUI Results     │
+                └─────────────────────┘
+📊 Example Analysis
+
+A password such as:
+
+password123!
+
+may trigger several findings, including:
+
+Missing uppercase character
+Sequential characters
+Predictable modification
+Known breach exposure
+
+The application can therefore classify the password as requiring immediate action.
+
+A password that passes the configured checks and is not found in the breach dataset may receive:
+
+NO MAJOR ISSUES
+
+This does not mean the password is guaranteed to be secure.
+
+🧪 Testing
+
+The application was tested using different categories of passwords, including:
+
+Common Password
+password123!
+
+Used to test:
+
+Common-password detection
+Predictable modification detection
+Sequential-pattern detection
+Breach detection
+Keyboard Pattern
+qwerty123
+
+Used to test keyboard-pattern detection.
+
+Sequential Pattern
+Abcdef123!
+
+Used to test sequential-character detection.
+
+Repeated Characters
+AAAAAAAA
+
+Used to test repeated-character detection.
+
+Stronger Example
+StrongRandom!47xQ
+
+Used to test a password with a combination of character types and less predictable structure.
+
+Empty Input
+
+The application prevents analysis when no password has been entered and displays an input warning.
+
+🎯 Project Goals
+
+The primary goals of this project were to:
+
+Understand practical password-security concepts
+Implement password-analysis logic in Python
+Work with hashing concepts
+Integrate an external cybersecurity API
+Understand the HIBP k-anonymity approach
+Build a functional cybersecurity desktop application
+Practice GUI development using Tkinter
+Apply secure handling principles to password-related data
+Create a practical cybersecurity project suitable for a portfolio
+🔮 Future Improvements
 
 Possible future improvements include:
 
-Password strength estimation using entropy calculations
-More advanced password pattern detection
-Expanded common-password dictionaries
-Improved password recommendations
-More detailed breach statistics
-Password generation functionality
-Exporting security analysis reports
-Additional cybersecurity analysis features
-Improved user interface and visualization
-Educational Purpose
+Password entropy estimation
+More advanced password-strength analysis
+Expanded pattern detection
+Larger and regularly updated password datasets
+Additional keyboard-layout detection
+Improved reporting and export functionality
+Unit-test coverage
+More detailed security recommendations
+Standalone executable distribution
+Improved accessibility and UI customization
+📸 Screenshots
+Main Interface
 
-This project was developed as a cybersecurity learning project to demonstrate concepts including:
+Add a screenshot of the application's main interface here.
 
-Password security
-Pattern recognition
-Secure password practices
-Hashing
-API communication
-k-anonymity
-Data breach awareness
-Python GUI development
-Author
+screenshots/Password Security.png
+
+🧑‍💻 Author
 
 Yash Pathak
 
 Cybersecurity Project
+Built with:
 
-License
+Python
+Tkinter
+Requests
+HIBP Pwned Passwords API
+📄 License
 
-This project is provided for educational and cybersecurity awareness purposes.
+This project is intended for educational, learning, and portfolio purposes.
 
-See the LICENSE file for the applicable license terms.
+You are free to study and modify the source code for your own learning and development.
+
+⚠️ Disclaimer
+
+This project is designed for defensive cybersecurity education and password-security awareness.
+
+Do not use it to process passwords belonging to other people without their permission.
+
+Never enter passwords that you actively use for important accounts into third-party password-analysis tools unless you understand how the tool handles the data.
+
+For real-world account security, use a reputable password manager, unique passwords, and multi-factor authentication whenever available.
+
+⭐ Project Summary
+
+Password Security Analyzer is a Python/Tkinter cybersecurity application that combines local password analysis with privacy-conscious breach exposure checking.
+
+The project demonstrates practical implementation of:
+
+Python
+│
+├── Password Security Analysis
+├── Pattern Detection
+├── SHA-1 Hashing
+├── HIBP API Integration
+├── K-Anonymity Concept
+├── GUI Development
+├── Input Validation
+└── Security-Oriented Programming
+
+The goal is not simply to determine whether a password is "strong" or "weak", but to provide users with a clearer understanding of the specific characteristics that may make a password vulnerable.
+
+
+### `requirements.txt`
+
+Create a file named **exactly**:
+
+```text
+requirements.txt
+
+and put only this inside:
+
+requests

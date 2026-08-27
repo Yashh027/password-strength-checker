@@ -31,7 +31,6 @@ window = tk.Tk()
 
 window.title("Password Security Analyzer")
 
-# Smaller main window
 window.geometry("1000x700")
 window.minsize(850, 600)
 
@@ -43,6 +42,7 @@ window.configure(bg=BG)
 # ============================================================
 
 def create_panel(parent, **kwargs):
+
     return tk.Frame(
         parent,
         bg=PANEL,
@@ -60,6 +60,7 @@ def create_label(
     bold=False,
     **kwargs
 ):
+
     weight = "bold" if bold else "normal"
 
     return tk.Label(
@@ -87,7 +88,6 @@ main_container.pack(
 )
 
 
-# Canvas
 canvas = tk.Canvas(
     main_container,
     bg=BG,
@@ -102,7 +102,6 @@ canvas.pack(
 )
 
 
-# Scrollbar
 scrollbar = tk.Scrollbar(
     main_container,
     orient="vertical",
@@ -123,7 +122,6 @@ canvas.configure(
 )
 
 
-# Frame inside canvas
 content_frame = tk.Frame(
     canvas,
     bg=BG
@@ -166,7 +164,6 @@ canvas.bind(
 )
 
 
-# Mouse wheel scrolling
 def mouse_wheel(event):
 
     canvas.yview_scroll(
@@ -180,8 +177,6 @@ canvas.bind_all(
     mouse_wheel
 )
 
-
-# Linux mouse wheel support
 canvas.bind_all(
     "<Button-4>",
     lambda event: canvas.yview_scroll(-1, "units")
@@ -191,6 +186,32 @@ canvas.bind_all(
     "<Button-5>",
     lambda event: canvas.yview_scroll(1, "units")
 )
+
+
+# ============================================================
+# SECURITY CHECK LABEL UPDATE
+# ============================================================
+
+def update_check(
+    label,
+    passed,
+    good_text,
+    bad_text
+):
+
+    if passed:
+
+        label.config(
+            text=f"✓  {good_text}",
+            fg=GREEN
+        )
+
+    else:
+
+        label.config(
+            text=f"✗  {bad_text}",
+            fg=RED
+        )
 
 
 # ============================================================
@@ -216,95 +237,155 @@ def check_password_gui():
 
 
     # ========================================================
-    # SECURITY SCORE
+    # SECURITY VERDICT
     # ========================================================
 
-    score = result["score"]
+    if result["is_compromised"]:
 
-    score_value.config(
-        text=f"{score}/100"
-    )
-
-
-    # ========================================================
-    # THREAT RATING
-    # ========================================================
-
-    rating = result["rating"]
-
-    if rating == "Strong":
-
-        rating_value.config(
-            text="STRONG",
-            fg=GREEN
-        )
-
-    elif rating == "Moderate":
-
-        rating_value.config(
-            text="MODERATE",
-            fg=ORANGE
-        )
-
-    elif rating == "Weak":
-
-        rating_value.config(
-            text="WEAK",
-            fg=ORANGE
-        )
-
-    else:
-
-        rating_value.config(
-            text="VERY WEAK",
+        assessment_value.config(
+            text="ACTION REQUIRED",
             fg=RED
         )
 
+        assessment_details.config(
+            text=(
+                "This password has been found in known breach data. "
+                "It should not be used."
+            ),
+            fg=RED
+        )
 
-    # ========================================================
-    # SCORE BAR
-    # ========================================================
+    elif result["has_weakpass"]:
 
-    score_bar.delete("all")
+        assessment_value.config(
+            text="ACTION REQUIRED",
+            fg=RED
+        )
 
-    bar_width = 500
-    bar_height = 18
+        assessment_details.config(
+            text=(
+                "This password matches a known common password. "
+                "Choose a different password."
+            ),
+            fg=RED
+        )
 
-    score_bar.create_rectangle(
-        0,
-        0,
-        bar_width,
-        bar_height,
-        fill="#202b35",
-        outline=""
-    )
+    elif result["has_keypattern"]:
 
-    fill_width = int(
-        bar_width * score / 100
-    )
+        assessment_value.config(
+            text="HIGH RISK PATTERN",
+            fg=RED
+        )
 
+        assessment_details.config(
+            text=(
+                "A predictable keyboard pattern was detected. "
+                "Use a less predictable password."
+            ),
+            fg=RED
+        )
 
-    if score >= 80:
+    elif result["has_predictable_modification"]:
 
-        bar_color = GREEN
+        assessment_value.config(
+            text="PREDICTABLE PASSWORD",
+            fg=ORANGE
+        )
 
-    elif score >= 60:
+        assessment_details.config(
+            text=(
+                "The password appears to be a predictable variation "
+                "of a common password."
+            ),
+            fg=ORANGE
+        )
 
-        bar_color = ORANGE
+    elif result["rating"] in (
+        "Weak",
+        "Very Weak"
+    ):
+
+        assessment_value.config(
+            text="NEEDS IMPROVEMENT",
+            fg=ORANGE
+        )
+
+        assessment_details.config(
+            text=(
+                "Several security weaknesses were detected. "
+                "The password should be improved."
+            ),
+            fg=ORANGE
+        )
+
+    elif result["rating"] == "Moderate":
+
+        assessment_value.config(
+            text="NEEDS IMPROVEMENT",
+            fg=ORANGE
+        )
+
+        assessment_details.config(
+            text=(
+                "The password has some weaknesses and "
+                "can be improved."
+            ),
+            fg=ORANGE
+        )
 
     else:
 
-        bar_color = RED
+        assessment_value.config(
+            text="NO MAJOR ISSUES",
+            fg=GREEN
+        )
+
+        assessment_details.config(
+            text=(
+                "The password passed the current local security "
+                "checks and was not found in known breach data."
+            ),
+            fg=GREEN
+        )
 
 
-    score_bar.create_rectangle(
-        0,
-        0,
-        fill_width,
-        bar_height,
-        fill=bar_color,
-        outline=""
+    # ========================================================
+    # THREAT LEVEL
+    # ========================================================
+
+    threat_level_value.config(
+        text=result["threat_level"]
     )
+
+    if result["threat_level"] == "CRITICAL RISK":
+
+        threat_level_value.config(
+            fg=RED
+        )
+
+    elif result["threat_level"] == "HIGH RISK":
+
+        threat_level_value.config(
+            fg=RED
+        )
+
+    elif result["threat_level"] == "MEDIUM RISK":
+
+        threat_level_value.config(
+            fg=ORANGE
+        )
+
+    elif result["threat_level"] == "LOW RISK":
+
+        threat_level_value.config(
+            fg=ORANGE
+        )
+
+    else:
+
+        threat_level_value.config(
+            fg=GREEN
+        )
 
 
     # ========================================================
@@ -312,7 +393,7 @@ def check_password_gui():
     # ========================================================
 
     length_value.config(
-        text=f"Length: {result['length']} characters"
+        text=f"{result['length']} characters"
     )
 
 
@@ -376,6 +457,13 @@ def check_password_gui():
         "Keyboard Pattern Detected"
     )
 
+    update_check(
+        predictable_status,
+        not result["has_predictable_modification"],
+        "No Predictable Modification",
+        "Predictable Modification Detected"
+    )
+
 
     # ========================================================
     # BREACH INTELLIGENCE
@@ -389,7 +477,10 @@ def check_password_gui():
         )
 
         breach_details.config(
-            text="HIBP service unavailable."
+            text=(
+                "HIBP service unavailable. "
+                "Breach status could not be verified."
+            )
         )
 
     elif result["is_compromised"]:
@@ -431,6 +522,40 @@ def check_password_gui():
             "Password is shorter than 8 characters."
         )
 
+    elif result["length"] < 12:
+
+        reasons.append(
+            "Password is shorter than the recommended 12 characters."
+        )
+
+
+    if not result["has_upper"]:
+
+        reasons.append(
+            "No uppercase character was detected."
+        )
+
+
+    if not result["has_lower"]:
+
+        reasons.append(
+            "No lowercase character was detected."
+        )
+
+
+    if not result["has_digit"]:
+
+        reasons.append(
+            "No number was detected."
+        )
+
+
+    if not result["has_special"]:
+
+        reasons.append(
+            "No special character was detected."
+        )
+
 
     if result["has_weakpass"]:
 
@@ -460,6 +585,14 @@ def check_password_gui():
         )
 
 
+    if result["has_predictable_modification"]:
+
+        reasons.append(
+            "The password appears to be a predictable "
+            "modification of a common password."
+        )
+
+
     if result["is_compromised"]:
 
         reasons.append(
@@ -471,7 +604,7 @@ def check_password_gui():
 
         summary_label.config(
             text=(
-                "No major weaknesses detected by the "
+                "No major weaknesses were detected by the "
                 "current analysis rules."
             ),
             fg=GREEN
@@ -488,36 +621,11 @@ def check_password_gui():
         )
 
 
-    # Automatically move to the result section
+    # Automatically move toward results
+
     canvas.update_idletasks()
 
-    canvas.yview_moveto(0.15)
-
-
-# ============================================================
-# SECURITY CHECK LABEL UPDATE
-# ============================================================
-
-def update_check(
-    label,
-    passed,
-    good_text,
-    bad_text
-):
-
-    if passed:
-
-        label.config(
-            text=f"✓  {good_text}",
-            fg=GREEN
-        )
-
-    else:
-
-        label.config(
-            text=f"✗  {bad_text}",
-            fg=RED
-        )
+    canvas.yview_moveto(0.12)
 
 
 # ============================================================
@@ -558,30 +666,26 @@ def clear_results():
         tk.END
     )
 
-    score_value.config(
-        text="--/100"
-    )
 
-    rating_value.config(
+    assessment_value.config(
         text="WAITING",
         fg=MUTED
     )
 
+    assessment_details.config(
+        text="Enter a password and run the security analysis.",
+        fg=MUTED
+    )
+
+
+    threat_level_value.config(
+        text="--",
+        fg=MUTED
+    )
+
+
     length_value.config(
-        text="Length: -- characters"
-    )
-
-    score_bar.delete(
-        "all"
-    )
-
-    score_bar.create_rectangle(
-        0,
-        0,
-        500,
-        18,
-        fill="#202b35",
-        outline=""
+        text="-- characters"
     )
 
 
@@ -625,6 +729,11 @@ def clear_results():
         (
             keyboard_status,
             "○  No Keyboard Pattern"
+        ),
+
+        (
+            predictable_status,
+            "○  No Predictable Modification"
         )
 
     ]:
@@ -704,7 +813,6 @@ create_label(
 )
 
 
-# Developer credit
 create_label(
     header,
     "Developed by Yash Pathak  •  Cybersecurity Project",
@@ -830,45 +938,45 @@ clear_button.pack(
 
 
 # ============================================================
-# SECURITY SCORE PANEL
+# SECURITY ASSESSMENT PANEL
 # ============================================================
 
-score_panel = create_panel(
+assessment_panel = create_panel(
     content_frame,
     padx=20,
-    pady=10
+    pady=15
 )
 
-score_panel.pack(
+assessment_panel.pack(
     fill="x",
     padx=35,
     pady=8
 )
 
 
-score_top = tk.Frame(
-    score_panel,
+assessment_top = tk.Frame(
+    assessment_panel,
     bg=PANEL
 )
 
-score_top.pack(
+assessment_top.pack(
     fill="x"
 )
 
 
-score_left = tk.Frame(
-    score_top,
+assessment_left = tk.Frame(
+    assessment_top,
     bg=PANEL
 )
 
-score_left.pack(
+assessment_left.pack(
     side="left"
 )
 
 
 create_label(
-    score_left,
-    "SECURITY SCORE",
+    assessment_left,
+    "SECURITY VERDICT",
     10,
     CYAN,
     True
@@ -877,33 +985,33 @@ create_label(
 )
 
 
-score_value = create_label(
-    score_left,
-    "--/100",
-    28,
-    WHITE,
+assessment_value = create_label(
+    assessment_left,
+    "WAITING",
+    22,
+    MUTED,
     True
 )
 
-score_value.pack(
+assessment_value.pack(
     anchor="w",
-    pady=(3, 0)
+    pady=(4, 0)
 )
 
 
-score_right = tk.Frame(
-    score_top,
+assessment_right = tk.Frame(
+    assessment_top,
     bg=PANEL
 )
 
-score_right.pack(
+assessment_right.pack(
     side="right"
 )
 
 
 create_label(
-    score_right,
-    "THREAT RATING",
+    assessment_right,
+    "THREAT LEVEL",
     9,
     MUTED,
     True
@@ -912,53 +1020,57 @@ create_label(
 )
 
 
-rating_value = create_label(
-    score_right,
-    "WAITING",
-    16,
+threat_level_value = create_label(
+    assessment_right,
+    "--",
+    12,
     MUTED,
     True
 )
 
-rating_value.pack(
+threat_level_value.pack(
+    anchor="e",
+    pady=(5, 8)
+)
+
+
+create_label(
+    assessment_right,
+    "PASSWORD LENGTH",
+    9,
+    MUTED,
+    True
+).pack(
+    anchor="e"
+)
+
+
+length_value = create_label(
+    assessment_right,
+    "-- characters",
+    14,
+    WHITE,
+    True
+)
+
+length_value.pack(
     anchor="e",
     pady=(5, 0)
 )
 
 
-score_bar = tk.Canvas(
-    score_panel,
-    width=500,
-    height=18,
-    bg=PANEL,
-    highlightthickness=0
-)
-
-score_bar.pack(
-    pady=(15, 5)
-)
-
-
-score_bar.create_rectangle(
-    0,
-    0,
-    500,
-    18,
-    fill="#202b35",
-    outline=""
-)
-
-
-length_value = create_label(
-    score_panel,
-    "Length: -- characters",
+assessment_details = create_label(
+    assessment_panel,
+    "Enter a password and run the security analysis.",
     9,
-    MUTED
+    MUTED,
+    wraplength=800,
+    justify="left"
 )
 
-length_value.pack(
+assessment_details.pack(
     anchor="w",
-    pady=(5, 0)
+    pady=(12, 0)
 )
 
 
@@ -1121,6 +1233,22 @@ keyboard_status.grid(
     row=3,
     column=1,
     sticky="w",
+    pady=3
+)
+
+
+predictable_status = create_label(
+    checks_grid,
+    "○  No Predictable Modification",
+    9,
+    MUTED
+)
+
+predictable_status.grid(
+    row=4,
+    column=0,
+    sticky="w",
+    padx=(0, 80),
     pady=3
 )
 
